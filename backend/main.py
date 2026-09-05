@@ -1,168 +1,129 @@
+from fastapi import FastAPI, HTTPException
 from datos.datos_mesas import inicializar_mesas
 from servicios.mesa_servicio import MesaServicio
+from esquema.mesa_esquema import MesaCrear, MesaActualizar
+
+app = FastAPI(title="sistema de gestion de Restuarantes",
+              description="gestion de mesas del restaurante", version="1.0")
+servicio = MesaServicio()
+inicializar_mesas()
 
 
-def mostrar_mesas(mesas):
+@app.get("/")
+def inicio():
+    return {"mensaje": "sistema de gestion de restaurantes",
+            "modulo": "mesas",
+            "estado": "activo"
+            }
 
-    print("\n===== LISTA DE MESAS =====")
 
-    for mesa in mesas:
-        print(
-            f"ID: {mesa.id_mesa} | "
-            f"Mesa: {mesa.numero} | "
-            f"Estado: {mesa.estado}"
+@app.get("/mesas")
+def listar_mesas():
+    mesas = servicio.listar_mesas()
+
+    return [
+        {
+            "id_mesa": mesa.id_mesa,
+            "numero": mesa.numero,
+            "estado": mesa.estado
+        }
+        for mesa in mesas
+    ]
+
+
+@app.get("/mesas/{numero}")
+def buscar_mesas(numero: int):
+    mesa = servicio.buscar_mesa(numero)
+
+    if mesa is None:
+        return {
+            "mensaje": "mesa no encontrada"
+        }
+
+    return {
+        "id_mesa": mesa.id_mesa,
+        "numero": mesa.numero,
+        "estado": mesa.estado
+    }
+
+
+@app.post("/mesas")
+def crear_mesa(datos: MesaCrear):
+
+    mesa = servicio.crear_mesa(datos.numero)
+    if mesa is None:
+        raise HTTPException(
+            status_code=409, detail="ya existe una measa con el mismo numero ")
+
+    return {
+        "mensaje": "mesa creada correctamente",
+        "id_mesa": mesa.id_mesa,
+        "numero": mesa.numero,
+        "estado": mesa.estado
+    }
+
+
+@app.put("/mesas/{numero}")
+def actualizar_mesa(numero: int, datos: MesaActualizar):
+    mesa = servicio.actualizar_mesa(numero, datos.nuevo_numero)
+    if mesa is None:
+        raise HTTPException(
+            status_code=404,
+            detail="no se puede actualizar la mesa"
         )
+    return {
+        "mensaje": "mesa actualizada correctamente",
+        "id:mesa": mesa.id_mesa,
+        "numero": mesa.numero,
+        "estado": mesa.estado
+
+    }
 
 
-def main():
+@app.delete("/mesas/{numero}")
+def eliminar_mesa(numero: int):
+    mesa = servicio.eliminar_mesa(numero)
 
-    inicializar_mesas()
+    if mesa is None:
+        raise HTTPException(
+            status_code=404, detail="no se puedo eliminar la mesa")
 
-    servicio = MesaServicio()
+    return {
+        "mensaje": "mesa eliminada correctamente",
+        "id_mesa": mesa.id_mesa,
+        "numero": mesa.numero
+    }
 
-    # ==========================================
-    # 1. LISTAR
-    # ==========================================
 
-    print("\n===== 1. LISTAR MESAS =====")
+@app.put("/mesas/{numero}/ocupar")
+def ocupar_mesa(numero: int):
 
-    mostrar_mesas(servicio.listar_mesas())
+    mesa = servicio.ocupar_mesa(numero)
 
-    # ==========================================
-    # 2. BUSCAR
-    # ==========================================
-
-    print("\n===== 2. BUSCAR MESA 5 =====")
-
-    mesa = servicio.buscar_mesa(5)
-
-    if mesa:
-        print(
-            f"Mesa encontrada → "
-            f"ID: {mesa.id_mesa} | "
-            f"Mesa: {mesa.numero} | "
-            f"Estado: {mesa.estado}"
+    if mesa is None:
+        raise HTTPException(
+            status_code=404,
+            detail="No se pudo ocupar la mesa"
         )
-    else:
-        print("Mesa no encontrada")
+    return {
+        "mensaje": "mesa ocupada correctamente",
+        "id_mesa": mesa.id_mesa,
+        "numero": mesa.numero,
+        "estado": mesa.estado
+    }
 
-    # ==========================================
-    # 3. OCUPAR
-    # ==========================================
 
-    print("\n===== 3. OCUPAR MESA 5 =====")
-
-    mesa = servicio.ocupar_mesa(5)
-
-    if mesa:
-        print(
-            f"Mesa {mesa.numero} → "
-            f"Estado: {mesa.estado}"
+@app.put("/mesas/{numero}/liberar")
+def liberar_mesa(numero: int):
+    mesa = servicio.liberar_mesa(numero)
+    if mesa is None:
+        raise HTTPException(
+            status_code=404,
+            detail="no se pudo liberar la mesa"
         )
-    else:
-        print("No se pudo ocupar la mesa")
-
-    # ==========================================
-    # 4. INTENTAR OCUPARLA DE NUEVO
-    # ==========================================
-
-    print("\n===== 4. OCUPAR MESA 5 NUEVAMENTE =====")
-
-    mesa = servicio.ocupar_mesa(5)
-
-    if mesa:
-        print("Mesa ocupada correctamente")
-    else:
-        print("No se puede ocupar: la mesa ya está ocupada")
-
-    # ==========================================
-    # 5. LIBERAR
-    # ==========================================
-
-    print("\n===== 5. LIBERAR MESA 5 =====")
-
-    mesa = servicio.liberar_mesa(5)
-
-    if mesa:
-        print(
-            f"Mesa {mesa.numero} → "
-            f"Estado: {mesa.estado}"
-        )
-    else:
-        print("No se pudo liberar la mesa")
-
-    # ==========================================
-    # 6. CREAR
-    # ==========================================
-
-    print("\n===== 6. CREAR MESA 13 =====")
-
-    mesa = servicio.crear_mesa(13)
-
-    if mesa:
-        print(
-            f"Mesa creada → "
-            f"ID: {mesa.id_mesa} | "
-            f"Mesa: {mesa.numero} | "
-            f"Estado: {mesa.estado}"
-        )
-    else:
-        print("No se pudo crear la mesa")
-
-    # ==========================================
-    # 7. INTENTAR CREAR DUPLICADA
-    # ==========================================
-
-    print("\n===== 7. CREAR MESA 13 NUEVAMENTE =====")
-
-    mesa = servicio.crear_mesa(13)
-
-    if mesa:
-        print("Mesa creada")
-    else:
-        print("No se puede crear: la mesa 13 ya existe")
-
-    # ==========================================
-    # 8. ACTUALIZAR
-    # ==========================================
-
-    print("\n===== 8. ACTUALIZAR MESA 13 → 20 =====")
-
-    mesa = servicio.actualizar_mesa(13, 20)
-
-    if mesa:
-        print(
-            f"Mesa actualizada → "
-            f"ID: {mesa.id_mesa} | "
-            f"Nuevo número: {mesa.numero} | "
-            f"Estado: {mesa.estado}"
-        )
-    else:
-        print("No se pudo actualizar la mesa")
-
-    # ==========================================
-    # 9. ELIMINAR
-    # ==========================================
-
-    print("\n===== 9. ELIMINAR MESA 20 =====")
-
-    mesa = servicio.eliminar_mesa(20)
-
-    if mesa:
-        print(
-            f"Mesa {mesa.numero} eliminada correctamente"
-        )
-    else:
-        print("No se pudo eliminar la mesa")
-
-    # ==========================================
-    # 10. LISTADO FINAL
-    # ==========================================
-
-    print("\n===== 10. ESTADO FINAL =====")
-
-    mostrar_mesas(servicio.listar_mesas())
-
-
-if __name__ == "__main__":
-    main()
+    return {
+        "mensaje": "mesa liberada correctamente",
+        "id_mesa": mesa.id_mesa,
+        "numero": mesa.numero,
+        "estado": mesa.estado
+    }
