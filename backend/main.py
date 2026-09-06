@@ -2,11 +2,17 @@ from fastapi import FastAPI, HTTPException
 from datos.datos_mesas import inicializar_mesas
 from servicios.mesa_servicio import MesaServicio
 from esquema.mesa_esquema import MesaCrear, MesaActualizar
+from servicios.platos_servicios import Platoservicio
+from esquema.plato_esquema import (PlatoCrear, PlatoActualizar)
+from datos.datos_platos import inicializar_platos
+
 
 app = FastAPI(title="sistema de gestion de Restuarantes",
               description="gestion de mesas del restaurante", version="1.0")
 servicio = MesaServicio()
+plato_servicio = Platoservicio()
 inicializar_mesas()
+inicializar_platos()
 
 
 @app.get("/")
@@ -126,4 +132,111 @@ def liberar_mesa(numero: int):
         "id_mesa": mesa.id_mesa,
         "numero": mesa.numero,
         "estado": mesa.estado
+    }
+
+
+@app.get("/platos")
+def listar_platos():
+
+    platos = plato_servicio.listar_platos()
+
+    return [
+        {
+            "id_plato": plato.id_plato,
+            "nombre": plato.nombre,
+            "precio": plato.precio,
+            "categoria": plato.categoria,
+            "disponible": plato.disponible
+        }
+        for plato in platos
+    ]
+
+
+@app.get("/platos/{id_plato}")
+def buscar_plato(id_plato: int):
+
+    plato = plato_servicio.buscar_plato(id_plato)
+
+    if plato is None:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Plato no encontrado"
+        )
+
+    return {
+        "id_plato": plato.id_plato,
+        "nombre": plato.nombre,
+        "precio": plato.precio,
+        "categoria": plato.categoria,
+        "disponible": plato.disponible
+    }
+
+
+@app.post("/platos")
+def crear_plato(datos: PlatoCrear):
+
+    plato = plato_servicio.crear_plato(
+        datos.nombre,
+        datos.precio,
+        datos.categoria
+    )
+
+    return {
+        "mensaje": "Plato creado correctamente",
+        "id_plato": plato.id_plato,
+        "nombre": plato.nombre,
+        "precio": plato.precio,
+        "categoria": plato.categoria,
+        "disponible": plato.disponible
+    }
+
+
+@app.put("/platos/{id_plato}")
+def actualizar_plato(
+    id_plato: int,
+    datos: PlatoActualizar
+):
+
+    plato = plato_servicio.actualizar_plato(
+        id_plato,
+        datos.nombre,
+        datos.precio,
+        datos.categoria,
+        datos.disponible
+    )
+
+    if plato is None:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Plato no encontrado"
+        )
+
+    return {
+        "mensaje": "Plato actualizado correctamente",
+        "id_plato": plato.id_plato,
+        "nombre": plato.nombre,
+        "precio": plato.precio,
+        "categoria": plato.categoria,
+        "disponible": plato.disponible
+    }
+
+
+@app.delete("/platos/{id_plato}")
+def eliminar_plato(id_plato: int):
+
+    plato = plato_servicio.eliminar_plato(id_plato)
+
+    if plato is None:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Plato no encontrado"
+        )
+
+    return {
+        "mensaje": "Plato eliminado correctamente",
+        "id_plato": plato.id_plato,
+        "nombre": plato.nombre
     }
