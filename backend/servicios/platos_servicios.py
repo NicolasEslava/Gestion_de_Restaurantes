@@ -19,7 +19,7 @@ class Platoservicio:
             if plato.id_plato >= nuevo_id:
                 nuevo_id = plato.id_palto + 1
 
-        nuevo_plato = plato(
+        nuevo_plato = Plato(
             id_plato=nuevo_id,
             nombre=nombre,
             precio=precio,
