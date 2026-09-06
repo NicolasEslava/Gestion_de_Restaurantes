@@ -5,7 +5,10 @@ from esquema.mesa_esquema import MesaCrear, MesaActualizar
 from servicios.platos_servicios import Platoservicio
 from esquema.plato_esquema import (PlatoCrear, PlatoActualizar)
 from datos.datos_platos import inicializar_platos
-
+from servicios.pedido_servicio import (
+    crear_pedido, agregar_detalle, modificar_detalle, eliminar_detalle, obtener_pedido, calcular_pedido)
+from esquema.pedido_esquema import (
+    PedidoCrear, PedidoRespuesta, DetallePedidoCrear, DetallePedidoModificar)
 
 app = FastAPI(title="sistema de gestion de Restuarantes",
               description="gestion de mesas del restaurante", version="1.0")
@@ -240,3 +243,66 @@ def eliminar_plato(id_plato: int):
         "id_plato": plato.id_plato,
         "nombre": plato.nombre
     }
+
+
+@app.post("/pedidos")
+def crear_pedido_endpoint(datos: PedidoCrear):
+
+    return crear_pedido(
+        datos.id_mesa
+    )
+
+
+@app.post("/pedidos/{id_pedido}/detalles")
+def agregar_detalle_endpoint(
+    id_pedido: int,
+    datos: DetallePedidoCrear
+):
+
+    return agregar_detalle(
+        id_pedido=id_pedido,
+        id_plato=datos.id_plato,
+        cantidad=datos.cantidad,
+        observacion=datos.observacion
+    )
+
+
+@app.get("/pedidos/{id_pedido}")
+def obtener_pedido_endpoint(
+    id_pedido: int
+):
+
+    return calcular_pedido(
+        id_pedido
+    )
+
+
+@app.delete(
+    "/pedidos/{id_pedido}/detalles/{id_detalle}"
+)
+def eliminar_detalle_endpoint(
+    id_pedido: int,
+    id_detalle: int
+):
+
+    return eliminar_detalle(
+        id_pedido,
+        id_detalle
+    )
+
+
+@app.put(
+    "/pedidos/{id_pedido}/detalles/{id_detalle}"
+)
+def modificar_detalle_endpoint(
+    id_pedido: int,
+    id_detalle: int,
+    datos: DetallePedidoModificar
+):
+
+    return modificar_detalle(
+        id_pedido=id_pedido,
+        id_detalle=id_detalle,
+        cantidad=datos.cantidad,
+        observacion=datos.observacion
+    )
