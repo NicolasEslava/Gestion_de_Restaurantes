@@ -12,8 +12,8 @@ from esquema.pedido_esquema import (
 from servicios.prefactura_servicios import (
     crear_prefactura, obtener_prefactura, obtener_prefactura_por_pedido)
 
-app = FastAPI(title="sistema de gestion de Restuarantes",
-              description="gestion de mesas del restaurante", version="1.0")
+app = FastAPI(title="Sistema de Gestion de Restuarantes",
+              description="Gestion de mesas y ordenes del restaurante", version="1.0")
 servicio = MesaServicio()
 plato_servicio = Platoservicio()
 inicializar_mesas()
@@ -28,7 +28,7 @@ def inicio():
             }
 
 
-@app.get("/mesas")
+@app.get("/mesas", tags=["Gestion de mesas"])
 def listar_mesas():
     mesas = servicio.listar_mesas()
 
@@ -42,7 +42,7 @@ def listar_mesas():
     ]
 
 
-@app.get("/mesas/{numero}")
+@app.get("/mesas/{numero}",)
 def buscar_mesas(numero: int):
     mesa = servicio.buscar_mesa(numero)
 
@@ -58,7 +58,7 @@ def buscar_mesas(numero: int):
     }
 
 
-@app.post("/mesas")
+@app.post("/mesas", tags=["Gestion de mesas"])
 def crear_mesa(datos: MesaCrear):
 
     mesa = servicio.crear_mesa(datos.numero)
@@ -91,7 +91,7 @@ def actualizar_mesa(numero: int, datos: MesaActualizar):
     }
 
 
-@app.delete("/mesas/{numero}")
+@app.delete("/mesas/{numero}", tags=["Gestion de mesas"])
 def eliminar_mesa(numero: int):
     mesa = servicio.eliminar_mesa(numero)
 
@@ -106,7 +106,7 @@ def eliminar_mesa(numero: int):
     }
 
 
-@app.put("/mesas/{numero}/ocupar")
+@app.put("/mesas/{numero}/ocupar", tags=["Operacion en tiempo real"])
 def ocupar_mesa(numero: int):
 
     mesa = servicio.ocupar_mesa(numero)
@@ -124,7 +124,7 @@ def ocupar_mesa(numero: int):
     }
 
 
-@app.put("/mesas/{numero}/liberar")
+@app.put("/mesas/{numero}/liberar", tags=["Operacion en tiempo real"])
 def liberar_mesa(numero: int):
     mesa = servicio.liberar_mesa(numero)
     if mesa is None:
@@ -140,7 +140,7 @@ def liberar_mesa(numero: int):
     }
 
 
-@app.get("/platos")
+@app.get("/platos", tags=["Gestion de platos"])
 def listar_platos():
 
     platos = plato_servicio.listar_platos()
@@ -157,7 +157,7 @@ def listar_platos():
     ]
 
 
-@app.get("/platos/{id_plato}")
+@app.get("/platos/{id_plato}", tags=["Gestion de platos"])
 def buscar_plato(id_plato: int):
 
     plato = plato_servicio.buscar_plato(id_plato)
@@ -178,7 +178,7 @@ def buscar_plato(id_plato: int):
     }
 
 
-@app.post("/platos")
+@app.post("/platos", tags=["Gestion de platos"])
 def crear_plato(datos: PlatoCrear):
 
     plato = plato_servicio.crear_plato(
@@ -197,7 +197,7 @@ def crear_plato(datos: PlatoCrear):
     }
 
 
-@app.put("/platos/{id_plato}")
+@app.put("/platos/{id_plato}", tags=["Gestion de platos"])
 def actualizar_plato(
     id_plato: int,
     datos: PlatoActualizar
