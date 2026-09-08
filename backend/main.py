@@ -9,6 +9,8 @@ from servicios.pedido_servicio import (
     crear_pedido, agregar_detalle, modificar_detalle, eliminar_detalle, obtener_pedido, calcular_pedido)
 from esquema.pedido_esquema import (
     PedidoCrear, PedidoRespuesta, DetallePedidoCrear, DetallePedidoModificar)
+from servicios.prefactura_servicios import (
+    crear_prefactura, obtener_prefactura, obtener_prefactura_por_pedido)
 
 app = FastAPI(title="sistema de gestion de Restuarantes",
               description="gestion de mesas del restaurante", version="1.0")
@@ -305,4 +307,34 @@ def modificar_detalle_endpoint(
         id_detalle=id_detalle,
         cantidad=datos.cantidad,
         observacion=datos.observacion
+    )
+
+
+@app.post("/prefacturas/pedido/{id_pedido}")
+def crear_prefactura_endpoint(
+    id_pedido: int
+):
+
+    return crear_prefactura(
+        id_pedido
+    )
+
+
+@app.get("/prefacturas/{id_prefactura}")
+def obtener_prefactura_endpoint(
+    id_prefactura: int
+):
+
+    return obtener_prefactura(
+        id_prefactura
+    )
+
+
+@app.get("/prefacturas/pedido/{id_pedido}")
+def obtener_prefactura_pedido_endpoint(
+    id_pedido: int
+):
+
+    return obtener_prefactura_por_pedido(
+        id_pedido
     )
