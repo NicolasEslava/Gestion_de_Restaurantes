@@ -1,4 +1,4 @@
-from datos.conexion import conectar
+from backend.datos.conexion import conectar
 
 conexion = conectar()
 
