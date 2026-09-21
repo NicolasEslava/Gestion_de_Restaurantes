@@ -2,8 +2,8 @@ from fastapi import HTTPException
 
 from modelos.pedido import Pedido, DetallePedido
 from datos.datos_pedidos import (pedidos, contador_pedido, contador_detalle)
-from datos.datos_platos import platos
-from datos.datos_mesas import mesas
+from servicios.mesa_servicio import MesaServicio
+from servicios.platos_servicios import Platoservicio
 
 
 def buscar_pedido_por_mesa(id_mesa: int):
@@ -35,52 +35,24 @@ def buscar_detalle(pedido: Pedido, id_detalle: int):
 
 def buscar_plato(id_plato: int):
 
-    for plato in platos:
+    servicio_platos = Platoservicio()
 
-        if plato.id_plato == id_plato:
-            return plato
-
-    return None
+    return servicio_platos.buscar_plato(id_plato)
 
 
 def crear_pedido(id_mesa: int):
 
     global contador_pedido
 
-    # Verificar que exista la mesa
-    mesa_existe = False
+    servicio_mesas = MesaServicio()
 
-    for mesa in mesas:
+    mesa = servicio_mesas.buscar_mesa(id_mesa)
 
-        if mesa.id_mesa == id_mesa:
-            mesa_existe = True
-            break
-
-    if not mesa_existe:
+    if mesa is None:
         raise HTTPException(
             status_code=404,
             detail="La mesa no existe."
         )
-
-    # Verificar que la mesa no tenga ya un pedido
-    pedido_existente = buscar_pedido_por_mesa(id_mesa)
-
-    if pedido_existente:
-        raise HTTPException(
-            status_code=400,
-            detail="La mesa ya tiene un pedido activo."
-        )
-
-    nuevo_pedido = Pedido(
-        id_pedido=contador_pedido,
-        id_mesa=id_mesa
-    )
-
-    pedidos.append(nuevo_pedido)
-
-    contador_pedido += 1
-
-    return nuevo_pedido
 
 
 def agregar_detalle(

@@ -1,67 +1,136 @@
 from modelos.plato import Plato
-
-platos = []
-
-
-def inicializar_platos():
-    if len(platos) == 0:
-        platos_iniciales = [
-            Plato(
-                id_plato=1,
-                nombre="hamburguesa",
-                precio=20000,
-                categoria="hamburguesas"
-            ),
-            Plato(
-                id_plato=2,
-                nombre="hamburguesa doble",
-                precio=280000,
-                categoria="hamburguesas",
-            ),
-            Plato(
-                id_plato=3,
-                nombre="papas",
-                precio=8000,
-                categoria="acompañamientos",
-            ),
-            Plato(
-                id_plato=4,
-                nombre="dedos de queso",
-                precio=20000,
-                categoria="acompañamientos",
-            ),
-            Plato(
-                id_plato=5,
-                nombre="gaseosa",
-                precio=6000,
-                categoria="bebidas",
-            ),
-            Plato(
-                id_plato=6,
-                nombre="jugo natural",
-                precio=12000,
-                categoria="bebidas",
-            ),
-        ]
-
-        platos.extend(platos_iniciales)
+from datos.conexion import conectar
 
 
-def obtener_platos():
+def eliminar_plato_db(id_plato):
+    conexion = conectar()
+    cursor = conexion.cursor()
+
+    cursor.execute("""
+        DELETE FROM productos
+        WHERE id_producto = %s
+    """, (id_plato,))
+
+    conexion.commit()
+
+    filas_afectadas = cursor.rowcount
+
+    cursor.close()
+    conexion.close()
+
+    return filas_afectadas
+
+
+def obtener_productos_db():
+    conexion = conectar()
+    cursor = conexion.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT
+            id_producto,
+            nombre_producto,
+            descripcion,
+            precio,
+            categoria,
+            estado
+        FROM productos
+    """)
+
+    productos = cursor.fetchall()
+
+    cursor.close()
+    conexion.close()
+
+    return productos
+
+
+def obtener_platos_db():
+    productos = obtener_productos_db()
+
+    platos = []
+
+    for producto in productos:
+        plato = Plato(
+            id_plato=producto["id_producto"],
+            nombre=producto["nombre_producto"],
+            precio=producto["precio"],
+            categoria=producto["categoria"],
+            disponible=producto["estado"] == "disponible"
+        )
+
+        platos.append(plato)
+
     return platos
 
 
-def agregar_plato(plato):
-    platos.append(plato)
+def buscar_plato_db(id_plato):
+    conexion = conectar()
+    cursor = conexion.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT
+            id_producto,
+            nombre_producto,
+            descripcion,
+            precio,
+            categoria,
+            estado
+        FROM productos
+        WHERE id_producto = %s
+    """, (id_plato,))
+
+    producto = cursor.fetchone()
+
+    cursor.close()
+    conexion.close()
+
+    return producto
 
 
-def eliminar_plato(id_plato):
-    plato = None
-    for p in platos:
-        if p.id_plato == id_plato:
-            plato = p
-            break
-    if plato is not None:
-        platos.remove(plato)
-        return True
-    return False
+def crear_plato_db(nombre, precio, categoria):
+    conexion = conectar()
+    cursor = conexion.cursor()
+
+    cursor.execute("""
+        INSERT INTO productos
+        (nombre_producto, precio, categoria, estado)
+        VALUES (%s, %s, %s, %s)
+    """, (nombre, precio, categoria, "disponible"))
+
+    conexion.commit()
+
+    id_plato = cursor.lastrowid
+
+    cursor.close()
+    conexion.close()
+
+    return id_plato
+
+
+def actualizar_plato_db(id_plato, nombre, precio, categoria, disponible):
+    conexion = conectar()
+    cursor = conexion.cursor()
+
+    cursor.execute("""
+        UPDATE productos
+        SET nombre_producto = %s,
+            precio = %s,
+            categoria = %s,
+            estado = %s
+        WHERE id_producto = %s
+    """, (
+        nombre,
+        precio,
+        categoria,
+        "disponible" if disponible else "no disponible",
+        id_plato
+    ))
+
+    conexion.commit()
+
+    filas_afectadas = cursor.rowcount
+
+    cursor.close()
+    conexion.close()
+
+    return filas_afectadas

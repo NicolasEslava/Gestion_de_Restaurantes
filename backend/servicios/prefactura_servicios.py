@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from modelos.prefactura import (Prefactura, DetallePrefactura)
 from datos.datos_prefactura import (prefacturas, contador_prefactura)
 from datos.datos_pedidos import pedidos
-from datos.datos_platos import platos
+from servicios.platos_servicios import Platoservicio
 
 
 def buscar_pedido(id_pedido: int):
@@ -17,12 +17,9 @@ def buscar_pedido(id_pedido: int):
 
 def buscar_plato(id_plato: int):
 
-    for plato in platos:
+    servicio_platos = Platoservicio()
 
-        if plato.id_plato == id_plato:
-            return plato
-
-    return None
+    return servicio_platos.buscar_plato(id_plato)
 
 
 def buscar_prefactura(id_prefactura: int):

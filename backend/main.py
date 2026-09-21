@@ -1,10 +1,8 @@
 from fastapi import FastAPI, HTTPException
-from datos.datos_mesas import inicializar_mesas
 from servicios.mesa_servicio import MesaServicio
 from esquema.mesa_esquema import MesaCrear, MesaActualizar
 from servicios.platos_servicios import Platoservicio
 from esquema.plato_esquema import (PlatoCrear, PlatoActualizar)
-from datos.datos_platos import inicializar_platos
 from servicios.pedido_servicio import (
     crear_pedido, agregar_detalle, modificar_detalle, eliminar_detalle, obtener_pedido, calcular_pedido)
 from esquema.pedido_esquema import (
@@ -16,8 +14,6 @@ app = FastAPI(title="Sistema de Gestion de Restuarantes",
               description="Gestion de mesas y ordenes del restaurante", version="1.0")
 servicio = MesaServicio()
 plato_servicio = Platoservicio()
-inicializar_mesas()
-inicializar_platos()
 
 
 @app.get("/")
