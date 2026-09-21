@@ -17,7 +17,7 @@ class Platoservicio:
         nuevo_id = 1
         for plato in obtener_platos():
             if plato.id_plato >= nuevo_id:
-                nuevo_id = plato.id_plato + 1
+                nuevo_id = plato.id_palto + 1
 
         nuevo_plato = Plato(
             id_plato=nuevo_id,
