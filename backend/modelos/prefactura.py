@@ -1,5 +1,14 @@
 class DetallePrefactura:
-    def _init_(self, id_detalle: int, id_plato: int, nombre_plato: str, precio_unitario: float, cantidad: int, observacion=None, subtotal: float = 0):
+    def __init__(
+            self,
+            id_detalle: int,
+            id_plato: int,
+            nombre_plato: str,
+            precio_unitario: float,
+            cantidad: int,
+            observacion=None,
+            subtotal: float = 0):
+
         self.id_detalle = id_detalle
         self.id_plato = id_plato
         self.nombre_plato = nombre_plato
@@ -10,7 +19,15 @@ class DetallePrefactura:
 
 
 class Prefactura:
-    def _init_(self, id_prefactura: int, id_pedido: int, id_mesa: int, detalles=None, subtotal: float = 0, total: float = 0):
+    def __init__(
+            self,
+            id_prefactura: int,
+            id_pedido: int,
+            id_mesa: int,
+            detalles=None,
+            subtotal: float = 0,
+            total: float = 0):
+
         self.id_prefactura = id_prefactura
         self.id_pedido = id_pedido
         self.id_mesa = id_mesa

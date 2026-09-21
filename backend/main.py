@@ -4,7 +4,7 @@ from esquema.mesa_esquema import MesaCrear, MesaActualizar
 from servicios.platos_servicios import Platoservicio
 from esquema.plato_esquema import (PlatoCrear, PlatoActualizar)
 from servicios.pedido_servicio import (
-    crear_pedido, agregar_detalle, modificar_detalle, eliminar_detalle, obtener_pedido, calcular_pedido)
+    crear_pedido, agregar_detalle, modificar_detalle, eliminar_detalle, obtener_pedido, calcular_pedido, cerrar_pedido)
 from esquema.pedido_esquema import (
     PedidoCrear, PedidoRespuesta, DetallePedidoCrear, DetallePedidoModificar)
 from servicios.prefactura_servicios import (
@@ -273,6 +273,11 @@ def obtener_pedido_endpoint(
     return calcular_pedido(
         id_pedido
     )
+
+
+@app.put("/pedidos/{id_pedido}/cerrar")
+def cerrar_pedido_endpoint(id_pedido: int):
+    return cerrar_pedido(id_pedido)
 
 
 @app.delete(
