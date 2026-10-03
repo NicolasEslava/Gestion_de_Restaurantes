@@ -12,8 +12,8 @@ def obtener_conexion():
     try:
         return mysql.connector.connect(
             host=host,
-            usuario=usuario,
-            contraseña=contraseña,
+            user=user,
+            password=password,
             database=database,
             port=port,
             autocommit=True
