@@ -1,3 +1,4 @@
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, HTTPException
 from servicios.mesa_servicio import MesaServicio
 from esquema.mesa_esquema import MesaCrear, MesaActualizar
@@ -10,10 +11,21 @@ from esquema.pedido_esquema import (
 from servicios.prefactura_servicios import (
     crear_prefactura, obtener_prefactura, obtener_prefactura_por_pedido)
 
-app = FastAPI(title="Sistema de Gestion de Restuarantes",
-              description="Gestion de mesas y ordenes del restaurante", version="1.0")
+app = FastAPI(
+    title="Sistema de Gestion de Restuarantes",
+    description="Gestion de mesas y ordenes del restaurante",
+    version="1.0"
+)
 servicio = MesaServicio()
 plato_servicio = Platoservicio()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")

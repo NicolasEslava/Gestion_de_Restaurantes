@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Gestión de Restaurantes</title>
+
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+    <header class="topbar">
+
+        <div class="brand">
+
+            <img src="/imagenes/logo.png" alt="Logo Gestión de Restaurantes">
+
+            <div>
+                <h1>Gestión de Restaurantes</h1>
+                <span>Modulo de toma de pedidos</span>
+            </div>
+
+        </div>
+
+        <div class="user">
+            👤 <span>Administrador</span>
+        </div>
+
+    </header>
+
+
+    <main class="container">
+
+        <section class="welcome">
+
+            <div>
+                <h2>Panel principal</h2>
+                <p>Gestiona las mesas, pedidos y productos del restaurante.</p>
+            </div>
+
+            <div class="status">
+                <span class="status-dot"></span>
+                Sistema activo
+            </div>
+
+        </section>
+
+
+        <section class="stats">
+
+            <div class="stat-card">
+                <span>🪑</span>
+                <div>
+                    <small>Total mesas</small>
+                    <strong id="total-mesas">0</strong>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <span>🟢</span>
+                <div>
+                    <small>Mesas libres</small>
+                    <strong id="mesas-libres">0</strong>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <span>🔴</span>
+                <div>
+                    <small>Mesas ocupadas</small>
+                    <strong id="mesas-ocupadas">0</strong>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <span>🍔</span>
+                <div>
+                    <small>Productos</small>
+                    <strong id="total-productos">0</strong>
+                </div>
+            </div>
+
+        </section>
+
+
+        <section class="content">
+
+            <div class="section-header">
+
+                <div>
+                    <h2>Mesas</h2>
+                    <p>Selecciona una mesa para gestionar su pedido.</p>
+                </div>
+
+                <button onclick="cargarMesas()" class="refresh-btn">
+                    🔄 Actualizar
+                </button>
+
+            </div>
+
+
+            <div id="mesas-container" class="mesas-grid">
+
+                <p>Cargando mesas...</p>
+
+            </div>
+
+        </section>
+
+
+        <section class="content">
+
+            <div class="section-header">
+
+                <div>
+                    <h2>Productos</h2>
+                    <p>Productos disponibles en el restaurante.</p>
+                </div>
+
+            </div>
+
+            <div id="productos-container" class="productos-grid">
+
+                <p>Cargando productos...</p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script src="js/app.js"></script>
+
+</body>
+
+</html>

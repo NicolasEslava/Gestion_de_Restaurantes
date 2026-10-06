@@ -13,7 +13,7 @@ def obtener_mesas_db():
             numero,
             estado
         FROM mesas
-        ORDER BY numero
+        ORDER BY numero 
     """)
 
     mesas = cursor.fetchall()
