@@ -1,21 +1,42 @@
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, status
+
 from servicios.mesa_servicio import MesaServicio
 from esquema.mesa_esquema import MesaCrear, MesaActualizar
 from servicios.platos_servicios import Platoservicio
-from esquema.plato_esquema import (PlatoCrear, PlatoActualizar)
+from esquema.plato_esquema import PlatoCrear, PlatoActualizar
 from servicios.pedido_servicio import (
-    crear_pedido, agregar_detalle, modificar_detalle, eliminar_detalle, obtener_pedido, calcular_pedido, cerrar_pedido)
+    crear_pedido,
+    agregar_detalle,
+    modificar_detalle,
+    eliminar_detalle,
+    obtener_pedido,
+    calcular_pedido,
+    cerrar_pedido
+)
 from esquema.pedido_esquema import (
-    PedidoCrear, PedidoRespuesta, DetallePedidoCrear, DetallePedidoModificar)
+    PedidoCrear,
+    PedidoRespuesta,
+    DetallePedidoCrear,
+    DetallePedidoModificar
+)
 from servicios.prefactura_servicios import (
-    crear_prefactura, obtener_prefactura, obtener_prefactura_por_pedido)
+    crear_prefactura,
+    obtener_prefactura,
+    obtener_prefactura_por_pedido
+)
+from servicios.autenticacion_servicio import autenticar_usuario
+from esquema.autenticacion_esquema import (
+    InicioSesionSolicitud,
+    InicioSesionRespuesta
+)
 
 app = FastAPI(
     title="Sistema de Gestion de Restuarantes",
     description="Gestion de mesas y ordenes del restaurante",
-    version="1.0"
+    version="1.1"
 )
+
 servicio = MesaServicio()
 plato_servicio = Platoservicio()
 
@@ -28,18 +49,39 @@ app.add_middleware(
 )
 
 
+@app.post(
+    "/api/login",
+    tags=["Autenticacion"],
+    response_model=InicioSesionRespuesta
+)
+def iniciar_sesion(datos: InicioSesionSolicitud):
+    usuario = autenticar_usuario(datos.usuario, datos.contrasena)
+
+    if not usuario:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Usuario o contraseña incorrectos"
+        )
+
+    return {
+        "exito": True,
+        "mensaje": "Inicio de sesión exitoso",
+        "usuario": usuario
+    }
+
+
 @app.get("/")
 def inicio():
-    return {"mensaje": "sistema de gestion de restaurantes",
-            "modulo": "mesas",
-            "estado": "activo"
-            }
+    return {
+        "mensaje": "sistema de gestion de restaurantes",
+        "modulo": "mesas",
+        "estado": "activo"
+    }
 
 
 @app.get("/mesas", tags=["Gestion de mesas"])
 def listar_mesas():
     mesas = servicio.listar_mesas()
-
     return [
         {
             "id_mesa": mesa.id_mesa,
@@ -50,14 +92,12 @@ def listar_mesas():
     ]
 
 
-@app.get("/mesas/{numero}",)
+@app.get("/mesas/{numero}", tags=["Gestion de mesas"])
 def buscar_mesas(numero: int):
     mesa = servicio.buscar_mesa(numero)
 
     if mesa is None:
-        return {
-            "mensaje": "mesa no encontrada"
-        }
+        return {"mensaje": "mesa no encontrada"}
 
     return {
         "id_mesa": mesa.id_mesa,
@@ -68,7 +108,6 @@ def buscar_mesas(numero: int):
 
 @app.post("/mesas", tags=["Gestion de mesas"])
 def crear_mesa(datos: MesaCrear):
-
     mesa = servicio.crear_mesa(datos.numero)
     if mesa is None:
         raise HTTPException(
@@ -82,7 +121,7 @@ def crear_mesa(datos: MesaCrear):
     }
 
 
-@app.put("/mesas/{numero}")
+@app.put("/mesas/{numero}", tags=["Gestion de mesas"])
 def actualizar_mesa(numero: int, datos: MesaActualizar):
     mesa = servicio.actualizar_mesa(numero, datos.nuevo_numero)
     if mesa is None:
@@ -95,7 +134,6 @@ def actualizar_mesa(numero: int, datos: MesaActualizar):
         "id:mesa": mesa.id_mesa,
         "numero": mesa.numero,
         "estado": mesa.estado
-
     }
 
 
@@ -116,7 +154,6 @@ def eliminar_mesa(numero: int):
 
 @app.put("/mesas/{numero}/ocupar", tags=["Operacion en tiempo real"])
 def ocupar_mesa(numero: int):
-
     mesa = servicio.ocupar_mesa(numero)
 
     if mesa is None:
@@ -150,7 +187,6 @@ def liberar_mesa(numero: int):
 
 @app.get("/platos", tags=["Gestion de platos"])
 def listar_platos():
-
     platos = plato_servicio.listar_platos()
 
     return [
@@ -167,11 +203,9 @@ def listar_platos():
 
 @app.get("/platos/{id_plato}", tags=["Gestion de platos"])
 def buscar_plato(id_plato: int):
-
     plato = plato_servicio.buscar_plato(id_plato)
 
     if plato is None:
-
         raise HTTPException(
             status_code=404,
             detail="Plato no encontrado"
@@ -188,7 +222,6 @@ def buscar_plato(id_plato: int):
 
 @app.post("/platos", tags=["Gestion de platos"])
 def crear_plato(datos: PlatoCrear):
-
     plato = plato_servicio.crear_plato(
         datos.nombre,
         datos.precio,
@@ -210,7 +243,6 @@ def actualizar_plato(
     id_plato: int,
     datos: PlatoActualizar
 ):
-
     plato = plato_servicio.actualizar_plato(
         id_plato,
         datos.nombre,
@@ -220,7 +252,6 @@ def actualizar_plato(
     )
 
     if plato is None:
-
         raise HTTPException(
             status_code=404,
             detail="Plato no encontrado"
@@ -236,13 +267,11 @@ def actualizar_plato(
     }
 
 
-@app.delete("/platos/{id_plato}")
+@app.delete("/platos/{id_plato}", tags=["Gestion de platos"])
 def eliminar_plato(id_plato: int):
-
     plato = plato_servicio.eliminar_plato(id_plato)
 
     if plato is None:
-
         raise HTTPException(
             status_code=404,
             detail="Plato no encontrado"
@@ -255,20 +284,16 @@ def eliminar_plato(id_plato: int):
     }
 
 
-@app.post("/pedidos")
+@app.post("/pedidos", tags=["Gestion de pedidos"])
 def crear_pedido_endpoint(datos: PedidoCrear):
-
-    return crear_pedido(
-        datos.id_mesa
-    )
+    return crear_pedido(datos.id_mesa)
 
 
-@app.post("/pedidos/{id_pedido}/detalles")
+@app.post("/pedidos/{id_pedido}/detalles", tags=["Gestion de pedidos"])
 def agregar_detalle_endpoint(
     id_pedido: int,
     datos: DetallePedidoCrear
 ):
-
     return agregar_detalle(
         id_pedido=id_pedido,
         id_plato=datos.id_plato,
@@ -277,44 +302,30 @@ def agregar_detalle_endpoint(
     )
 
 
-@app.get("/pedidos/{id_pedido}")
-def obtener_pedido_endpoint(
-    id_pedido: int
-):
-
-    return calcular_pedido(
-        id_pedido
-    )
+@app.get("/pedidos/{id_pedido}", tags=["Gestion de pedidos"])
+def obtener_pedido_endpoint(id_pedido: int):
+    return calcular_pedido(id_pedido)
 
 
-@app.put("/pedidos/{id_pedido}/cerrar")
+@app.put("/pedidos/{id_pedido}/cerrar", tags=["Gestion de pedidos"])
 def cerrar_pedido_endpoint(id_pedido: int):
     return cerrar_pedido(id_pedido)
 
 
-@app.delete(
-    "/pedidos/{id_pedido}/detalles/{id_detalle}"
-)
+@app.delete("/pedidos/{id_pedido}/detalles/{id_detalle}", tags=["Gestion de pedidos"])
 def eliminar_detalle_endpoint(
     id_pedido: int,
     id_detalle: int
 ):
-
-    return eliminar_detalle(
-        id_pedido,
-        id_detalle
-    )
+    return eliminar_detalle(id_pedido, id_detalle)
 
 
-@app.put(
-    "/pedidos/{id_pedido}/detalles/{id_detalle}"
-)
+@app.put("/pedidos/{id_pedido}/detalles/{id_detalle}", tags=["Gestion de pedidos"])
 def modificar_detalle_endpoint(
     id_pedido: int,
     id_detalle: int,
     datos: DetallePedidoModificar
 ):
-
     return modificar_detalle(
         id_pedido=id_pedido,
         id_detalle=id_detalle,
@@ -323,31 +334,16 @@ def modificar_detalle_endpoint(
     )
 
 
-@app.post("/prefacturas/pedido/{id_pedido}")
-def crear_prefactura_endpoint(
-    id_pedido: int
-):
-
-    return crear_prefactura(
-        id_pedido
-    )
+@app.post("/prefacturas/pedido/{id_pedido}", tags=["Gestion de prefacturas"])
+def crear_prefactura_endpoint(id_pedido: int):
+    return crear_prefactura(id_pedido)
 
 
-@app.get("/prefacturas/{id_prefactura}")
-def obtener_prefactura_endpoint(
-    id_prefactura: int
-):
-
-    return obtener_prefactura(
-        id_prefactura
-    )
+@app.get("/prefacturas/{id_prefactura}", tags=["Gestion de prefacturas"])
+def obtener_prefactura_endpoint(id_prefactura: int):
+    return obtener_prefactura(id_prefactura)
 
 
-@app.get("/prefacturas/pedido/{id_pedido}")
-def obtener_prefactura_pedido_endpoint(
-    id_pedido: int
-):
-
-    return obtener_prefactura_por_pedido(
-        id_pedido
-    )
+@app.get("/prefacturas/pedido/{id_pedido}", tags=["Gestion de prefacturas"])
+def obtener_prefactura_pedido_endpoint(id_pedido: int):
+    return obtener_prefactura_por_pedido(id_pedido)
