@@ -1,17 +1,30 @@
-import os
+﻿import os
 import mysql.connector
 from dotenv import load_dotenv
 
 load_dotenv()
 
 
-def conectar():
-    conexion = mysql.connector.connect(
-        host=os.getenv("DB_HOST"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME"),
-        port=int(os.getenv("DB_PORT", 3306))
-    )
+def obtener_conexion():
+    host = os.getenv("DB_HOST", "localhost")
+    user = os.getenv("DB_USER", "root")
+    password = os.getenv("DB_PASSWORD", "")
+    database = os.getenv("DB_NAME", "gestion_restaurante")
+    port = int(os.getenv("DB_PORT", "3306"))
 
-    return conexion
+    try:
+        return mysql.connector.connect(
+            host=host,
+            user=user,
+            password=password,
+            database=database,
+            port=port,
+            autocommit=True
+        )
+    except mysql.connector.Error as e:
+        print(f"No se pudo conectar a MySQL: {e}")
+        return None
+
+
+def conectar():
+    return obtener_conexion()

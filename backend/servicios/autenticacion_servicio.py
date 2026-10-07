@@ -1,42 +1,88 @@
-import sys
+﻿import sys
 import os
 
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+project_root = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..")
+)
+
 if project_root not in sys.path:
     sys.path.append(project_root)
 
 from passlib.context import CryptContext
 from data_base.conexion import obtener_conexion
 
-contexto_contrasenas = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-def verificar_contrasena(contrasena: str, hash_contrasena: str) -> bool:
-    return contexto_contrasenas.verify(contrasena, hash_contrasena)
+contexto_contrasenas = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto"
+)
 
-def autenticar_usuario(usuario: str, contrasena_ingresada: str):
+
+def verificar_contrasena(
+    contrasena: str,
+    hash_contrasena: str
+) -> bool:
+
+    return contexto_contrasenas.verify(
+        contrasena,
+        hash_contrasena
+    )
+
+
+def autenticar_usuario(
+    usuario: str,
+    contrasena_ingresada: str
+):
+
     conexion = obtener_conexion()
+
     if conexion is None:
+        print("ERROR: No se pudo conectar a la base de datos.")
         return None
 
     try:
+
         cursor = conexion.cursor(dictionary=True)
+
         query = """
-            SELECT id, username AS usuario, password_hash AS hash_contrasena,
-                   nombre, rol
-            FROM usuarios 
-            WHERE username = %s AND estado = TRUE
+            SELECT
+                id,
+                username AS usuario,
+                password_hash AS hash_contrasena,
+                nombre,
+                rol
+            FROM usuarios
+            WHERE username = %s
+              AND estado = TRUE
         """
+
         cursor.execute(query, (usuario,))
+
         registro_usuario = cursor.fetchone()
+
+        print("====================================")
+        print("USUARIO BUSCADO:", usuario)
+        print("REGISTRO ENCONTRADO:", registro_usuario)
+        print("====================================")
+
         cursor.close()
 
         if not registro_usuario:
+            print("RESULTADO: USUARIO NO ENCONTRADO.")
             return None
 
-        if not verificar_contrasena(
-            contrasena_ingresada, registro_usuario["hash_contrasena"]
-        ):
+        contraseña_correcta = verificar_contrasena(
+            contrasena_ingresada,
+            registro_usuario["hash_contrasena"]
+        )
+
+        print("CONTRASEÑA CORRECTA:", contraseña_correcta)
+
+        if not contraseña_correcta:
+            print("RESULTADO: CONTRASEÑA INCORRECTA.")
             return None
+
+        print("RESULTADO: AUTENTICACIÓN EXITOSA.")
 
         return {
             "id": registro_usuario["id"],
@@ -44,9 +90,17 @@ def autenticar_usuario(usuario: str, contrasena_ingresada: str):
             "nombre": registro_usuario["nombre"],
             "rol": registro_usuario["rol"]
         }
+
     except Exception as e:
-        print(f"Error en la consulta: {e}")
+
+        print("====================================")
+        print("ERROR EN AUTENTICACIÓN:")
+        print(e)
+        print("====================================")
+
         return None
+
     finally:
+
         if conexion and conexion.is_connected():
             conexion.close()

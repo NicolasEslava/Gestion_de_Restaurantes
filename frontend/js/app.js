@@ -1,5 +1,21 @@
 const API_URL = "http://127.0.0.1:8000";
 
+// ======================================
+// USUARIO DE LA SESIÓN
+// ======================================
+
+const usuarioSesion = JSON.parse(
+    localStorage.getItem("usuario")
+);
+
+if (usuarioSesion) {
+
+    document.getElementById("usuario-nombre").textContent =
+        usuarioSesion.nombre;
+
+    document.getElementById("usuario-rol").textContent =
+        usuarioSesion.rol;
+}
 
 // ======================================
 // CARGAR MESAS
